@@ -1,45 +1,83 @@
-import type { Asset, CapitalGains } from '../types';
+import type { Asset, CapitalGains, TaxHarvestingResult } from '../types';
 
 /**
- * Pure function to calculate total derived capital gains based on 
- * base gains and the currently selected assets for harvesting.
+ * Ensures very small floating point errors are treated as zero.
  */
-export const calculateHarvestedGains = (
-  baseGains: CapitalGains,
+export const sanitizeNumber = (val: number): number => {
+  return Math.abs(val) < 1e-10 ? 0 : val;
+};
+
+/**
+ * Calculates net gains: profits - losses.
+ */
+export const calculateNet = (profits: number, losses: number): number => {
+  return sanitizeNumber(profits - losses);
+};
+
+/**
+ * Core Tax Loss Harvesting Calculation Engine.
+ * Does not mutate baseCapitalGains or holdings.
+ */
+export const computePostCapitalGains = (
+  baseCapitalGains: CapitalGains,
   holdings: Asset[],
   selectedIds: string[]
-): CapitalGains => {
-  const harvestedLosses = holdings
-    .filter((asset) => selectedIds.includes(asset.id) && asset.unrealizedGainLoss < 0)
-    .reduce((total, asset) => total + asset.unrealizedGainLoss, 0);
+): TaxHarvestingResult => {
+  // 1. Clone base values
+  const postStcg = { ...baseCapitalGains.stcg };
+  const postLtcg = { ...baseCapitalGains.ltcg };
 
-  let remainingLoss = Math.abs(harvestedLosses);
-  
-  let newShortTerm = baseGains.shortTerm;
-  if (newShortTerm > 0) {
-    if (remainingLoss >= newShortTerm) {
-      remainingLoss -= newShortTerm;
-      newShortTerm = 0;
-    } else {
-      newShortTerm -= remainingLoss;
-      remainingLoss = 0;
-    }
-  }
+  // 2. Iterate and apply rules for selected assets
+  holdings.forEach((asset) => {
+    if (selectedIds.includes(asset.id)) {
+      // Short-term rule
+      const stcgGain = sanitizeNumber(asset.stcg.gain);
+      if (stcgGain > 0) {
+        postStcg.profits += stcgGain;
+      } else if (stcgGain < 0) {
+        postStcg.losses += Math.abs(stcgGain);
+      }
 
-  let newLongTerm = baseGains.longTerm;
-  if (newLongTerm > 0 && remainingLoss > 0) {
-    if (remainingLoss >= newLongTerm) {
-      remainingLoss -= newLongTerm;
-      newLongTerm = 0;
-    } else {
-      newLongTerm -= remainingLoss;
-      remainingLoss = 0;
+      // Long-term rule
+      const ltcgGain = sanitizeNumber(asset.ltcg.gain);
+      if (ltcgGain > 0) {
+        postLtcg.profits += ltcgGain;
+      } else if (ltcgGain < 0) {
+        postLtcg.losses += Math.abs(ltcgGain);
+      }
     }
-  }
+  });
+
+  // Sanitize sums just in case of floating point buildup
+  postStcg.profits = sanitizeNumber(postStcg.profits);
+  postStcg.losses = sanitizeNumber(postStcg.losses);
+  postLtcg.profits = sanitizeNumber(postLtcg.profits);
+  postLtcg.losses = sanitizeNumber(postLtcg.losses);
+
+  // 3. Compute Nets
+  const preStcgNet = calculateNet(baseCapitalGains.stcg.profits, baseCapitalGains.stcg.losses);
+  const preLtcgNet = calculateNet(baseCapitalGains.ltcg.profits, baseCapitalGains.ltcg.losses);
+  const preTotalNet = sanitizeNumber(preStcgNet + preLtcgNet);
+
+  const postStcgNet = calculateNet(postStcg.profits, postStcg.losses);
+  const postLtcgNet = calculateNet(postLtcg.profits, postLtcg.losses);
+  const postTotalNet = sanitizeNumber(postStcgNet + postLtcgNet);
+
+  // 4. Savings Condition
+  const isSaving = postTotalNet < preTotalNet;
+  const savings = isSaving ? sanitizeNumber(preTotalNet - postTotalNet) : 0;
 
   return {
-    shortTerm: newShortTerm,
-    longTerm: newLongTerm - remainingLoss,
+    preStcgNet,
+    preLtcgNet,
+    preTotalNet,
+    postStcgNet,
+    postLtcgNet,
+    postTotalNet,
+    savings,
+    isSaving,
+    postStcg,
+    postLtcg,
   };
 };
 
@@ -50,3 +88,24 @@ export const formatCurrency = (value: number): string => {
     signDisplay: 'exceptZero',
   }).format(value);
 };
+
+/* 
+ * UNIT-TEST-LIKE EXAMPLES:
+ * 
+ * const base = { stcg: { profits: 100, losses: 0 }, ltcg: { profits: 50, losses: 0 } };
+ * const holdings = [
+ *   { id: '1', stcg: { gain: -20 }, ltcg: { gain: 0 } }, // $20 ST loss
+ *   { id: '2', stcg: { gain: 0 }, ltcg: { gain: -30 } }, // $30 LT loss
+ *   { id: '3', stcg: { gain: 10 }, ltcg: { gain: 5 } }   // Ignored if not selected
+ * ];
+ * 
+ * computePostCapitalGains(base, holdings, ['1', '2'])
+ * 
+ * Result:
+ * postStcg.losses = 20
+ * postLtcg.losses = 30
+ * preTotalNet = 150
+ * postTotalNet = (100-20) + (50-30) = 80 + 20 = 100
+ * savings = 150 - 100 = 50
+ * isSaving = true
+ */

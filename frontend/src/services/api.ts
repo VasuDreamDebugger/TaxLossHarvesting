@@ -312,9 +312,9 @@ export const fetchHoldings = async (): Promise<Asset[]> => {
           costBasis: item.averageBuyPrice,
           currentPrice: item.currentPrice,
           // Calculating unrealized gain/loss from the provided raw data 
-          // (Alternatively we could use stcg.gain + ltcg.gain)
           unrealizedGainLoss: item.stcg.gain + item.ltcg.gain,
-          // Optional: we can attach the logo to the asset for future UI improvements
+          stcg: { balance: item.stcg.balance, gain: item.stcg.gain },
+          ltcg: { balance: item.ltcg.balance, gain: item.ltcg.gain },
           logo: item.logo,
         }));
         
@@ -336,8 +336,8 @@ export const fetchCapitalGains = async (): Promise<CapitalGains> => {
         const { stcg, ltcg } = CAPITAL_GAINS_DATA.capitalGains;
         
         const gains: CapitalGains = {
-          shortTerm: stcg.profits - stcg.losses,
-          longTerm: ltcg.profits - ltcg.losses,
+          stcg: { profits: stcg.profits, losses: stcg.losses },
+          ltcg: { profits: ltcg.profits, losses: ltcg.losses },
         };
         
         resolve(gains);

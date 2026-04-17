@@ -35,7 +35,7 @@ export const AssetItem = ({ asset, isSelected, onToggle }: AssetItemProps) => {
       <div className="text-right">
         <p className="font-medium text-text-primary">{formatCurrency(asset.currentPrice * asset.shares)}</p>
         <p className={`text-sm font-medium ${isLoss ? 'text-loss' : 'text-profit'}`}>
-          {isLoss ? '' : '+'}{formatCurrency(asset.unrealizedGainLoss)}
+          {isLoss ? '-' : '+'}{formatCurrency(Math.abs(asset.unrealizedGainLoss))}
         </p>
       </div>
     </div>

@@ -13,7 +13,10 @@ interface StoreState {
 
 export const useStore = create<StoreState>((set) => ({
   holdings: [],
-  baseCapitalGains: { shortTerm: 0, longTerm: 0 },
+  baseCapitalGains: { 
+    stcg: { profits: 0, losses: 0 }, 
+    ltcg: { profits: 0, losses: 0 } 
+  },
   selectedAssets: [],
   setHoldings: (holdings) => set({ holdings }),
   setBaseCapitalGains: (baseCapitalGains) => set({ baseCapitalGains }),
