@@ -1,10 +1,10 @@
 # Tax Loss Harvesting Dashboard
 
-[![Deploy Status](https://img.shields.io/badge/Deploy-Vercel-black?logo=vercel)](#)
+[![Deploy Status](https://img.shields.io/badge/Deploy-Vercel-black?logo=vercel)](https://tax-loss-harvesting-seven.vercel.app/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](#)
 [![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)](#)
 
-**Live Demo**: [https://your-app-link.vercel.app](https://your-app-link.vercel.app)
+**Live Demo**: [https://tax-loss-harvesting-seven.vercel.app/](https://tax-loss-harvesting-seven.vercel.app/)
 
 ## 1. Project Overview
 
