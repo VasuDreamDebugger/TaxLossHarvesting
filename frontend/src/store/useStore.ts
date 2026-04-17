@@ -8,6 +8,8 @@ interface StoreState {
   setHoldings: (holdings: Asset[]) => void;
   setBaseCapitalGains: (gains: CapitalGains) => void;
   toggleAssetSelection: (id: string) => void;
+  selectAllAssets: (ids: string[]) => void;
+  deselectAllAssets: () => void;
   clearSelection: () => void;
 }
 
@@ -26,5 +28,7 @@ export const useStore = create<StoreState>((set) => ({
         ? state.selectedAssets.filter((assetId) => assetId !== id)
         : [...state.selectedAssets, id],
     })),
+  selectAllAssets: (ids) => set({ selectedAssets: ids }),
+  deselectAllAssets: () => set({ selectedAssets: [] }),
   clearSelection: () => set({ selectedAssets: [] }),
 }));

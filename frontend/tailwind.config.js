@@ -4,21 +4,29 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        background: '#0B0F17',
-        card: '#111827',
-        profit: '#22C55E',
-        loss: '#EF4444',
-        'text-primary': '#E5E7EB',
-        'text-secondary': '#9CA3AF',
+        background: '#F8FAFC',
+        card: '#FFFFFF',
+        profit: '#10B981', 
+        loss: '#EF4444', 
+        'text-primary': '#1E293B', 
+        'text-secondary': '#64748B', 
         primary: {
-          start: '#2563EB',
+          DEFAULT: '#0066FF',
+          start: '#3B82F6',
           end: '#1D4ED8'
+        },
+        info: {
+          bg: '#EAF2FF',
+          border: '#BFD4FF',
+          text: '#1E293B'
         }
       },
+      fontFamily: {
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+      }
     },
   },
   plugins: [],

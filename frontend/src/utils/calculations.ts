@@ -82,11 +82,29 @@ export const computePostCapitalGains = (
 };
 
 export const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    signDisplay: 'exceptZero',
-  }).format(value);
+  const absoluteValue = Math.abs(value);
+  const formattedNumber = new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(absoluteValue);
+
+  if (value < 0) {
+    return `- $ ${formattedNumber}`;
+  }
+  return `$ ${formattedNumber}`;
+};
+
+export const formatCurrencyExact = (value: number): string => {
+  const absoluteValue = Math.abs(value);
+  const formattedNumber = new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(absoluteValue);
+
+  if (value < 0) {
+    return `-$${formattedNumber}`;
+  }
+  return `$${formattedNumber}`;
 };
 
 /* 

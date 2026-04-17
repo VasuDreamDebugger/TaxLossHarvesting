@@ -1,5 +1,7 @@
-import { CapitalGainsSummary } from './CapitalGainsSummary';
-import { HoldingsList } from '../holdings/HoldingsList';
+import { Header } from '../../components/Header';
+import { InfoBanner } from '../../components/InfoBanner';
+import { PrePostCards } from '../../components/PrePostCards';
+import { HoldingsTable } from '../../components/HoldingsTable';
 import { useInitializeData } from '../../hooks/useInitializeData';
 import { Loader2 } from 'lucide-react';
 
@@ -20,7 +22,7 @@ export const Dashboard = () => {
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="bg-card border border-loss p-6 rounded-xl max-w-md text-center">
+        <div className="bg-white border border-loss p-6 rounded-xl max-w-md text-center shadow-sm">
           <h2 className="text-loss text-lg font-bold mb-2">Error Loading Data</h2>
           <p className="text-text-secondary">{error}</p>
         </div>
@@ -29,19 +31,11 @@ export const Dashboard = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full">
-      <div className="lg:col-span-8 space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold text-text-primary mb-2">Tax Loss Harvesting</h1>
-          <p className="text-text-secondary">
-            Select underwater assets to offset your capital gains and reduce your tax liability.
-          </p>
-        </div>
-        <CapitalGainsSummary />
-      </div>
-      <div className="lg:col-span-4 h-[600px] lg:h-auto">
-        <HoldingsList />
-      </div>
+    <div className="w-full max-w-6xl mx-auto pb-12">
+      <Header />
+      <InfoBanner />
+      <PrePostCards />
+      <HoldingsTable />
     </div>
   );
 };
